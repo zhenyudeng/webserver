@@ -93,19 +93,20 @@ struct sockaddr_in HttpConn::GetAddr() const {
 //响应的封装
 bool HttpConn::process(){
     request_.Init(); 
+    //readBuff_是指存在读缓冲区客户端发来的HTTP报文数据
     if(readBuff_.ReadableBytes() <= 0) { 
         return false; 
     }
-    else if(request_.parse(readBuff_)) { //解析并封装响应
+    else if(request_.parse(readBuff_)) { //解析并封装HTTP响应
         //cout<<"request_.path():"<<request_.path().c_str()<<endl;
         //封装响应
         response_.Init(srcDir, request_.path(), request_.Post_(), request_.IsKeepAlive(), 200); //解析成功 开始封装响应
     } 
-    else { //返回错误页面
+    else { //解析失败就会返回失败页面返回错误页面
         response_.Init(srcDir, request_.path(), request_.Post_(), false, 400);
     }
 
-    response_.MakeResponse(writeBuff_); //响应保存在writeBuff_里面
+    response_.MakeResponse(writeBuff_); //响应内容保存在writeBuff_里面
     
     /* 响应头 */ //分散的写
     iov_[0].iov_base = const_cast<char*>(writeBuff_.Peek()); 
